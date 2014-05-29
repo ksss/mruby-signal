@@ -1,3 +1,8 @@
+/**
+ * signal.c
+ * This code was based on https://github.com/ruby/ruby/blob/trunk/signal.c
+ */
+
 #include <mruby.h>
 #include <mruby/hash.h>
 #include <mruby/string.h>
