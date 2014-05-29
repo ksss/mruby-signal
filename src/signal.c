@@ -22,6 +22,8 @@
 
 #define sighandler_t void*
 
+#define RETSIGTYPE void
+
 static const struct signals {
   const char *signm;
   int signo;
@@ -190,10 +192,6 @@ reserved_signal_p(int signo)
 
   return 0;
 }
-
-#define RETSIGTYPE void
-
-static sighandler_t mrb_signal(mrb_state *, int, sighandler_t);
 
 static const char*
 signo2signm(mrb_int no)
