@@ -417,6 +417,8 @@ mrb_mruby_signal_gem_init(mrb_state* mrb) {
   mrb_define_class_method(mrb, signal, "trap", signal_trap, MRB_ARGS_ANY());
   mrb_define_class_method(mrb, signal, "list", signal_list, MRB_ARGS_NONE());
   mrb_define_class_method(mrb, signal, "signame", signal_signame, MRB_ARGS_REQ(1));
+
+  mrb_define_method(mrb, mrb->kernel_module, "trap", signal_trap, MRB_ARGS_ANY());
 }
 
 void

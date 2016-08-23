@@ -1,3 +1,7 @@
+assert 'Kernel#trap' do
+  assert_equal "SIG_DFL", trap(:HUP, :SIG_DFL)
+end
+
 assert 'Signal#trap' do
   a = []
   pr = Proc.new{ a << :proc_trap }
