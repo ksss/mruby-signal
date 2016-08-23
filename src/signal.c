@@ -342,9 +342,9 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
 
   if (mrb_nil_p(oldcmd)) {
     if (oldfunc == SIG_IGN)
-      oldcmd = mrb_str_new_cstr(mrb, "SIG_IGN");
+      oldcmd = mrb_str_new_cstr(mrb, "IGNORE");
     else if (oldfunc == SIG_DFL)
-      oldcmd = mrb_str_new_cstr(mrb, "SIG_DFL");
+      oldcmd = mrb_str_new_cstr(mrb, "DEFAULT");
     else
       oldcmd = mrb_nil_value();
   }
