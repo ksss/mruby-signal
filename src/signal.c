@@ -8,6 +8,7 @@
 #include <mruby/string.h>
 #include <mruby/array.h>
 #include <mruby/variable.h>
+#include <mruby/class.h>
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
@@ -366,6 +367,7 @@ signal_trap(mrb_state *mrb, mrb_value mod)
   mrb_value *argv;
   mrb_int argc;
   sighandler_t func;
+  struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
 
   mrb_get_args(mrb, "*&", &argv, &argc, &block);
 
@@ -386,7 +388,7 @@ signal_trap(mrb_state *mrb, mrb_value mod)
     func = trap_handler(mrb, &command, sig);
   }
 
-  return trap(mrb, mod, sig, func, command);
+  return trap(mrb, mrb_obj_value(mrb_mSignal), sig, func, command);
 }
 
 static mrb_value
