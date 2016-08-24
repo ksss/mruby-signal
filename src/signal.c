@@ -297,7 +297,7 @@ trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
           break;
         case 4:
           if (memcmp(RSTRING_PTR(command), "EXIT", 4) == 0) {
-            *cmd = mrb_nil_value();
+            *cmd = mrb_undef_value();
           }
           break;
       }
