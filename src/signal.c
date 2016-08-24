@@ -239,7 +239,7 @@ trap_signm(mrb_state *mrb, mrb_value vsig)
       s = RSTRING_PTR(vsig);
 
 str_signal:
-      if (strncmp("SIG", s, 3) == 0)
+      if (memcmp("SIG", s, 3) == 0)
         s += 3;
       sig = signm2signo(s);
       if (sig == 0 && strcmp(s, "EXIT") != 0)
@@ -286,17 +286,17 @@ trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
       *cmd = command;
       switch (RSTRING_LEN(command)) {
         case 7:
-          if (strncmp(RSTRING_PTR(command), "SIG_IGN", 7) == 0) {
+          if (memcmp(RSTRING_PTR(command), "SIG_IGN", 7) == 0) {
             func = SIG_IGN;
             *cmd = mrb_nil_value();
           }
-          else if (strncmp(RSTRING_PTR(command), "SIG_DFL", 7) == 0) {
+          else if (memcmp(RSTRING_PTR(command), "SIG_DFL", 7) == 0) {
             func = SIG_DFL;
             *cmd = mrb_nil_value();
           }
           break;
         case 4:
-          if (strncmp(RSTRING_PTR(command), "EXIT", 4) == 0) {
+          if (memcmp(RSTRING_PTR(command), "EXIT", 4) == 0) {
             *cmd = mrb_nil_value();
           }
           break;
