@@ -316,6 +316,15 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
   sigact.sa_handler = handler;
   sigact.sa_flags = 0;
 
+  switch (signum) {
+#ifdef SA_NOCLDWAIT
+    case SIGCHLD:
+      if (handler == SIG_IGN)
+        sigact.sa_flags |= SA_NOCLDWAIT;
+      break;
+#endif
+  }
+
   if (sigaction(signum, &sigact, &old) < 0) {
     return SIG_ERR;
   }
