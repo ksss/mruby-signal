@@ -317,9 +317,7 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
   sigact.sa_flags = 0;
 
   if (sigaction(signum, &sigact, &old) < 0) {
-    if (errno != 0 && errno != EINVAL) {
-      mrb_bug(mrb, "sigaction %S", mrb_fixnum_value(errno));
-    }
+    return SIG_ERR;
   }
   return old.sa_handler;
 }
