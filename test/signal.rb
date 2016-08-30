@@ -1,5 +1,5 @@
 assert 'Kernel#trap' do
-  assert_equal "SIG_DFL", trap(:HUP, :SIG_DFL)
+  assert_equal "DEFAULT", trap(:HUP, :SIG_DFL)
 end
 
 assert 'Signal#trap' do
@@ -9,7 +9,7 @@ assert 'Signal#trap' do
 
   assert_equal pr, Signal.trap(:HUP, saved_trap)
   Signal.trap :HUP, :SIG_DFL
-  assert_equal "SIG_DFL", Signal.trap(:HUP, :SIG_DFL)
+  assert_equal "DEFAULT", Signal.trap(:HUP, :SIG_DFL)
 
   Signal.trap :SIGHUP, pr
   assert_equal pr, Signal.trap(:HUP, saved_trap)
