@@ -285,6 +285,9 @@ trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
     if (!mrb_nil_p(command)) {
       *cmd = command;
       switch (RSTRING_LEN(command)) {
+        case 0:
+          goto sig_ign;
+          break;
         case 6:
           if (memcmp(RSTRING_PTR(command), "IGNORE", 6) == 0) {
             goto sig_ign;
