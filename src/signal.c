@@ -285,8 +285,14 @@ trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
     if (!mrb_nil_p(command)) {
       *cmd = command;
       switch (RSTRING_LEN(command)) {
+        case 6:
+          if (memcmp(RSTRING_PTR(command), "IGNORE", 6) == 0) {
+            goto sig_ign;
+          }
+          break;
         case 7:
           if (memcmp(RSTRING_PTR(command), "SIG_IGN", 7) == 0) {
+sig_ign:
             func = SIG_IGN;
             *cmd = mrb_nil_value();
           }
