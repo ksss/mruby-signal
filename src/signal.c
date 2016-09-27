@@ -412,7 +412,6 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
   }
 
   mrb_ary_set(mrb, trap_list, (mrb_int)sig, command);
-  mrb_iv_set(mrb, mod, id_trap_list, trap_list);
 
   return oldcmd;
 }
