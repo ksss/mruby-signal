@@ -260,17 +260,25 @@ sighandler(int sig)
   mrb_value command = mrb_ary_ref(mrb, trap_list, sig);
   const char *cstr_signm;
   mrb_value signm;
-  mrb_value eSignal;
 
   if (mrb_type(command) == MRB_TT_PROC) {
     mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(sig));
   } else if (mrb_nil_p(command)) {
     mrb_signal(mrb, sig, sighandler);
 
+    cstr_signm = signo2signm(sig);
+    signm = mrb_str_cat(mrb, mrb_str_new_cstr(mrb, "SIG"), cstr_signm, strlen(cstr_signm));
     /* default actions */
     switch (sig) {
       case SIGINT:
-        mrb_raise(mrb, mrb_class_get(mrb, "Interrupt"), "");
+        mrb_exc_raise(mrb, mrb_funcall(
+          mrb,
+          mrb_obj_value(mrb_class_get(mrb, "Interrupt")),
+          "new",
+          2,
+          mrb_str_new_cstr(mrb, ""),
+          mrb_fixnum_value(sig)
+        ));
         break;
 #ifdef SIGHUP
       case SIGHUP:
@@ -290,17 +298,14 @@ sighandler(int sig)
 #ifdef SIGUSR2
       case SIGUSR2:
 #endif
-        cstr_signm = signo2signm(sig);
-        signm = mrb_str_cat(mrb, mrb_str_new_cstr(mrb, "SIG"), cstr_signm, strlen(cstr_signm));
-        eSignal = mrb_funcall(
+        mrb_exc_raise(mrb, mrb_funcall(
           mrb,
           mrb_obj_value(mrb_class_get(mrb, "SignalException")),
           "new",
           2,
           signm,
           mrb_fixnum_value(sig)
-        );
-        mrb_exc_raise(mrb, eSignal);
+        ));
         break;
       default:
         break;
