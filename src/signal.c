@@ -249,21 +249,63 @@ str_signal:
   return sig;
 }
 
-static void
-mrb_signal_exec(int sig)
-{
-  mrb_state *mrb = global_mrb;
-  struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
-
-  mrb_value trap_list = mrb_iv_get(mrb, mrb_obj_value(mrb_mSignal), mrb_intern_lit(mrb, "trap_list"));
-  mrb_value command = mrb_ary_ref(mrb, trap_list, sig);
-  mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(sig));
-}
+static sighandler_t mrb_signal(mrb_state *mrb, int signum, sighandler_t handler);
 
 static RETSIGTYPE
 sighandler(int sig)
 {
-  mrb_signal_exec(sig);
+  mrb_state *mrb = global_mrb;
+  struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
+  mrb_value trap_list = mrb_iv_get(mrb, mrb_obj_value(mrb_mSignal), mrb_intern_lit(mrb, "trap_list"));
+  mrb_value command = mrb_ary_ref(mrb, trap_list, sig);
+  const char *cstr_signm;
+  mrb_value signm;
+  mrb_value eSignal;
+
+  if (mrb_type(command) == MRB_TT_PROC) {
+    mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(sig));
+  } else if (mrb_nil_p(command)) {
+    mrb_signal(mrb, sig, sighandler);
+
+    /* default actions */
+    switch (sig) {
+      case SIGINT:
+        mrb_raise(mrb, mrb_class_get(mrb, "Interrupt"), "");
+        break;
+#ifdef SIGHUP
+      case SIGHUP:
+#endif
+#ifdef SIGQUIT
+      case SIGQUIT:
+#endif
+#ifdef SIGTERM
+      case SIGTERM:
+#endif
+#ifdef SIGALRM
+      case SIGALRM:
+#endif
+#ifdef SIGUSR1
+      case SIGUSR1:
+#endif
+#ifdef SIGUSR2
+      case SIGUSR2:
+#endif
+        cstr_signm = signo2signm(sig);
+        signm = mrb_str_cat(mrb, mrb_str_new_cstr(mrb, "SIG"), cstr_signm, strlen(cstr_signm));
+        eSignal = mrb_funcall(
+          mrb,
+          mrb_obj_value(mrb_class_get(mrb, "SignalException")),
+          "new",
+          2,
+          signm,
+          mrb_fixnum_value(sig)
+        );
+        mrb_exc_raise(mrb, eSignal);
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 static sighandler_t
@@ -325,6 +367,11 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
   sigact.sa_handler = handler;
   sigact.sa_flags = 0;
 
+#ifdef SA_NODEFER
+  /* emulate CRuby behavior */
+  sigact.sa_flags |= SA_NODEFER;
+#endif
+
   switch (signum) {
 #ifdef SA_NOCLDWAIT
     case SIGCHLD:
@@ -333,7 +380,6 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
       break;
 #endif
   }
-
   if (sigaction(signum, &sigact, &old) < 0) {
     return SIG_ERR;
   }
@@ -438,6 +484,23 @@ mrb_trap_exit(mrb_state *mrb)
   }
 }
 
+static int
+install_sighandler(mrb_state *mrb, int signum, sighandler_t handler)
+{
+  sighandler_t old;
+
+  old = mrb_signal(mrb, signum, handler);
+  if (old == SIG_ERR) return -1;
+  /* signal handler should be inherited during exec. */
+  if (old != SIG_DFL) {
+    mrb_signal(mrb, signum, old);
+  }
+  return 0;
+}
+#ifndef __native_client__
+#  define install_sighandler(mrb, signum, handler) (install_sighandler(mrb, signum, handler) ? mrb_bug(mrb, #signum) : (void)0)
+#endif
+
 void
 mrb_mruby_signal_gem_init(mrb_state* mrb) {
   struct RClass *signal = mrb_define_module(mrb, "Signal");
@@ -448,6 +511,26 @@ mrb_mruby_signal_gem_init(mrb_state* mrb) {
   mrb_define_class_method(mrb, signal, "signame", signal_signame, MRB_ARGS_REQ(1));
 
   mrb_define_method(mrb, mrb->kernel_module, "trap", signal_trap, MRB_ARGS_ANY());
+
+  install_sighandler(mrb, SIGINT, sighandler);
+#ifdef SIGHUP
+  install_sighandler(mrb, SIGHUP, sighandler);
+#endif
+#ifdef SIGQUIT
+  install_sighandler(mrb, SIGQUIT, sighandler);
+#endif
+#ifdef SIGTERM
+  install_sighandler(mrb, SIGTERM, sighandler);
+#endif
+#ifdef SIGALRM
+  install_sighandler(mrb, SIGALRM, sighandler);
+#endif
+#ifdef SIGUSR1
+  install_sighandler(mrb, SIGUSR1, sighandler);
+#endif
+#ifdef SIGUSR2
+  install_sighandler(mrb, SIGUSR2, sighandler);
+#endif
 }
 
 void
