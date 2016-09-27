@@ -350,9 +350,6 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
 
   id_trap_list = mrb_intern_lit(mrb, "trap_list");
   trap_list = mrb_iv_get(mrb, mod, id_trap_list);
-  if (mrb_nil_p(trap_list)) {
-    trap_list = mrb_ary_new_capa(mrb, NSIG);
-  }
   oldfunc = mrb_signal(mrb, sig, func);
   oldcmd = mrb_ary_ref(mrb, trap_list, (mrb_int)sig);
 
@@ -433,12 +430,8 @@ mrb_trap_exit(mrb_state *mrb)
 {
   struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
   mrb_value trap_list = mrb_iv_get(mrb, mrb_obj_value(mrb_mSignal), mrb_intern_lit(mrb, "trap_list"));
-  mrb_value command;
-  if (mrb_nil_p(trap_list)) {
-    return;
-  }
+  mrb_value command = mrb_ary_ref(mrb, trap_list, 0);
 
-  command = mrb_ary_ref(mrb, trap_list, 0);
   if (!mrb_nil_p(command)) {
     mrb_ary_set(mrb, trap_list, 0, mrb_nil_value());
     mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(0));
@@ -448,6 +441,7 @@ mrb_trap_exit(mrb_state *mrb)
 void
 mrb_mruby_signal_gem_init(mrb_state* mrb) {
   struct RClass *signal = mrb_define_module(mrb, "Signal");
+  mrb_obj_iv_set(mrb, (struct RObject *)signal, mrb_intern_lit(mrb, "trap_list"), mrb_ary_new_capa(mrb, NSIG));
 
   mrb_define_class_method(mrb, signal, "trap", signal_trap, MRB_ARGS_ANY());
   mrb_define_class_method(mrb, signal, "list", signal_list, MRB_ARGS_NONE());
