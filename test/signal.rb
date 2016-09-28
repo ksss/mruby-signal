@@ -1,5 +1,10 @@
 assert 'Kernel#trap' do
+  block = Proc.new {}
   assert_equal "DEFAULT", trap(:HUP, :SIG_DFL)
+  assert_equal "DEFAULT", trap(:HUP, &block)
+  assert_equal block, trap(:HUP, block)
+  assert_raise(ArgumentError) { trap(:HUP) }
+  assert_equal block, trap(:HUP, :SIG_DFL)
 end
 
 assert 'Signal#trap' do

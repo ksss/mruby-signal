@@ -347,7 +347,7 @@ sig_ign:
             *cmd = mrb_nil_value();
           }
           else if (memcmp(RSTRING_PTR(command), "SIG_DFL", 7) == 0) {
-            func = SIG_DFL;
+            func = sighandler;
             *cmd = mrb_nil_value();
           }
           break;
@@ -408,6 +408,8 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
     if (oldfunc == SIG_IGN)
       oldcmd = mrb_str_new_cstr(mrb, "IGNORE");
     else if (oldfunc == SIG_DFL)
+      oldcmd = mrb_str_new_cstr(mrb, "SYSTEM_DEFAULT");
+    else if (oldfunc == sighandler)
       oldcmd = mrb_str_new_cstr(mrb, "DEFAULT");
     else
       oldcmd = mrb_nil_value();
@@ -443,6 +445,9 @@ signal_trap(mrb_state *mrb, mrb_value mod)
   }
 
   if (argc == 1) {
+    if (mrb_type(block) != MRB_TT_PROC) {
+      mrb_raise(mrb, E_ARGUMENT_ERROR, "block must set");
+    }
     command = block;
     func = sighandler;
   }
