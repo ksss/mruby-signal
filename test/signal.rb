@@ -30,4 +30,5 @@ assert "Signal#signame" do
   assert_equal "HUP", Signal.signame(1)
   assert_equal "INT", Signal.signame(2)
   assert_equal "QUIT", Signal.signame(3)
+  assert_equal nil, Signal.signame(-1)
 end

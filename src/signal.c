@@ -466,13 +466,32 @@ signal_list(mrb_state *mrb, mrb_value mod)
   return h;
 }
 
+/*
+ * call-seq:
+ *     Signal.signame(signo)  ->  string or nil
+ *
+ *  Convert signal number to signal name.
+ *  Returns +nil+ if the signo is an invalid signal number.
+ *
+ *     Signal.trap("INT") { |signo| puts Signal.signame(signo) }
+ *     Process.kill("INT", 0)
+ *
+ *  <em>produces:</em>
+ *
+ *     INT
+ */
 static mrb_value
 signal_signame(mrb_state *mrb, mrb_value mod)
 {
   mrb_int signo;
+  const char *signame;
 
   mrb_get_args(mrb, "i", &signo);
-  return mrb_str_new_cstr(mrb, signo2signm(signo));
+  signame = signo2signm(signo);
+  if (signame)
+    return mrb_str_new_cstr(mrb, signame);
+  else
+    return mrb_nil_value();
 }
 
 static void
