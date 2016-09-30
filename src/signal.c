@@ -258,16 +258,12 @@ sighandler(int sig)
   struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
   mrb_value trap_list = mrb_iv_get(mrb, mrb_obj_value(mrb_mSignal), mrb_intern_lit(mrb, "trap_list"));
   mrb_value command = mrb_ary_ref(mrb, trap_list, sig);
-  const char *cstr_signm;
-  mrb_value signm;
 
   if (mrb_type(command) == MRB_TT_PROC) {
     mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(sig));
   } else if (mrb_nil_p(command)) {
     mrb_signal(mrb, sig, sighandler);
 
-    cstr_signm = signo2signm(sig);
-    signm = mrb_str_cat(mrb, mrb_str_new_cstr(mrb, "SIG"), cstr_signm, strlen(cstr_signm));
     /* default actions */
     switch (sig) {
       case SIGINT:
@@ -275,8 +271,7 @@ sighandler(int sig)
           mrb,
           mrb_obj_value(mrb_class_get(mrb, "Interrupt")),
           "new",
-          2,
-          mrb_str_new_cstr(mrb, ""),
+          1,
           mrb_fixnum_value(sig)
         ));
         break;
@@ -302,8 +297,7 @@ sighandler(int sig)
           mrb,
           mrb_obj_value(mrb_class_get(mrb, "SignalException")),
           "new",
-          2,
-          signm,
+          1,
           mrb_fixnum_value(sig)
         ));
         break;
