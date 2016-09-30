@@ -3,6 +3,7 @@ class SignalException < Exception
     super(message)
     @signo = signo
   end
+  alias signm message
 
   def signo
     @signo
