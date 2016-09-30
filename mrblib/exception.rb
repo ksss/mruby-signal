@@ -3,11 +3,8 @@ class SignalException < Exception
     super(message)
     @signo = signo
   end
+  attr_reader :signo
   alias signm message
-
-  def signo
-    @signo
-  end
 end
 
 class Interrupt < SignalException
