@@ -54,4 +54,7 @@ class SignalException < Exception
 end
 
 class Interrupt < SignalException
+  def initialize(message = "Interrupt")
+    super(Signal.list["INT"], message)
+  end
 end

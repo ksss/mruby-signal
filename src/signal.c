@@ -272,7 +272,7 @@ sighandler(int sig)
           mrb_obj_value(mrb_class_get(mrb, "Interrupt")),
           "new",
           1,
-          mrb_fixnum_value(sig)
+          mrb_str_new_cstr(mrb, "")
         ));
         break;
 #ifdef SIGHUP
