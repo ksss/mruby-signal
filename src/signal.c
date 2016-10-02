@@ -261,7 +261,7 @@ sighandler(int sig)
 
   if (mrb_type(command) == MRB_TT_PROC) {
     mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(sig));
-  } else if (mrb_nil_p(command)) {
+  } else {
     mrb_signal(mrb, sig, sighandler);
 
     /* default actions */
@@ -338,11 +338,11 @@ trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
           if (memcmp(RSTRING_PTR(command), "SIG_IGN", 7) == 0) {
 sig_ign:
             func = SIG_IGN;
-            *cmd = mrb_nil_value();
+            *cmd = mrb_true_value();
           }
           else if (memcmp(RSTRING_PTR(command), "SIG_DFL", 7) == 0) {
             func = sighandler;
-            *cmd = mrb_nil_value();
+            *cmd = mrb_true_value();
           }
           break;
         case 4:
@@ -399,6 +399,12 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
   oldcmd = mrb_ary_ref(mrb, trap_list, (mrb_int)sig);
 
   if (mrb_nil_p(oldcmd)) {
+    if (oldfunc == sighandler)
+      oldcmd = mrb_str_new_cstr(mrb, "DEFAULT");
+    else
+      oldcmd = mrb_nil_value();
+  }
+  else if (mrb_type(oldcmd) == MRB_TT_TRUE) {
     if (oldfunc == SIG_IGN)
       oldcmd = mrb_str_new_cstr(mrb, "IGNORE");
     else if (oldfunc == SIG_DFL)
