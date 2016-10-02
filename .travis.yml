@@ -8,3 +8,5 @@ before_script:
     - cd ../mruby-spec
 script:
     - make MRUBY_CONFIG="../../mruby-signal/.travis-build_config.rb" TESTS="core/{signal,exception/{interrupt,signal_exception}_spec.rb}"
+notifications:
+  email: false
