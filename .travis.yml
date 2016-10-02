@@ -7,4 +7,4 @@ before_script:
     - git clone https://github.com/ksss/mruby-spec.git ../mruby-spec
     - cd ../mruby-spec
 script:
-    - make MRUBY_CONFIG="../mruby-signal/.travis-build_config.rb" TESTS="core/{signal,exception/{interrupt,signal_exception}_spec.rb}"
+    - make MRUBY_CONFIG="../../mruby-signal/.travis-build_config.rb" TESTS="core/{signal,exception/{interrupt,signal_exception}_spec.rb}"
