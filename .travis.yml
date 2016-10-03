@@ -7,6 +7,7 @@ before_script:
   - git clone https://github.com/ksss/mruby-spec.git ../mruby-spec
   - cd ../mruby-spec
 script:
+  - echo pwd
   - make MRUBY_CONFIG="../../mruby-signal/.travis-build_config.rb" TESTS="core/signal core/exception/interrupt_spec.rb core/exception/signal_exception_spec.rb"
 notifications:
   email: false
