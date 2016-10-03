@@ -5,8 +5,9 @@ install:
   - sudo apt-get -qq install ruby rake bison git gperf
 before_script:
   - git clone https://github.com/ksss/mruby-spec.git ../mruby-spec
-  - cd ../mruby-spec
+  - cd ..
 script:
-  - make MRUBY_CONFIG="../../mruby-signal/.travis-spec-build_config.rb" TESTS="core/signal core/exception/interrupt_spec.rb core/exception/signal_exception_spec.rb"
+  - cd mruby-spec; make MRUBY_CONFIG="../../mruby-signal/.travis-spec-build_config.rb" TESTS="core/signal core/exception/interrupt_spec.rb core/exception/signal_exception_spec.rb"
+  - cd mruby-spec/mruby; make test MRUBY_CONFIG="../../../mruby-signal/.travis-test-build_config"
 notifications:
   email: false
