@@ -23,7 +23,7 @@ MRuby::Build.new do |conf|
   conf.gem :mgem => "mruby-method"
   conf.gem :mgem => "mruby-catch-throw"
   conf.gem :github => 'haconiwa/mruby-exec'
-  conf.gem 'mruby-mspec-support'
+  conf.gem '../mruby-spec/mruby-mspec-support'
   # You can add gem what you want to testing
   # conf.gem :mgem => "your-gem"
   conf.gem :mgem => "mruby-require"
