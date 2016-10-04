@@ -1,5 +1,7 @@
 # mruby-signal
 
+[![Build Status](https://travis-ci.org/ksss/mruby-signal.svg?branch=master)](https://travis-ci.org/ksss/mruby-signal)
+
 Signal trap and callback in mruby
 
 ## Synopsis
