@@ -12,5 +12,5 @@ MRuby::Build.new('test') do |conf|
   conf.enable_test
 
   conf.gem :core => "mruby-print"
-  conf.gem "../../mruby-signal"
+  conf.gem "../mruby-signal"
 end
