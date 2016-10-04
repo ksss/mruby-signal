@@ -2,13 +2,13 @@
 
 [![Build Status](https://travis-ci.org/ksss/mruby-signal.svg?branch=master)](https://travis-ci.org/ksss/mruby-signal)
 
-Signal trap and callback in mruby
+Signal trap and callback in mruby.
 
 ## Synopsis
 
 ```ruby
 Signal.trap(:INT) { |signo|
-  p "hello signal"
+  p "hello signal #{Signal.signame(signo)}" #=> "hello signal INT"
 }
 ```
 
@@ -17,15 +17,18 @@ Signal.trap(:INT) { |signo|
 * Signal.trap(sig, command){|signo| block }
 * Signal.list
 * Signal.signame(signo)
+* Kernel.trap(sig, command){|signo| block }
 
 ## Installation
-
-### use github repository
 
 Write in /mruby/build_config.rb
 
 ```ruby
 MRuby::Build.new do |conf|
+  # from mgem
+  conf.gem :mgem => 'mruby-signal'
+
+  # or from github
   conf.gem :github => 'ksss/mruby-signal', :branch => 'master'
 end
 ```
