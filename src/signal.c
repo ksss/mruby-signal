@@ -377,8 +377,12 @@ sig_ign:
             *cmd = mrb_true_value();
           }
           else if (memcmp(RSTRING_PTR(command), "SIG_DFL", 7) == 0) {
+sig_dfl:
             func = default_handler(sig);
             *cmd = mrb_true_value();
+          }
+          else if (memcmp(RSTRING_PTR(command), "DEFAULT", 7) == 0) {
+            goto sig_dfl;
           }
           break;
         case 4:
