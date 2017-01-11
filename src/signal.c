@@ -236,6 +236,7 @@ trap_signm(mrb_state *mrb, mrb_value vsig)
       if (!s) mrb_raise(mrb, E_ARGUMENT_ERROR, "bad signal");
       goto str_signal;
     default:
+      vsig = mrb_string_type(mrb, vsig);
       s = RSTRING_PTR(vsig);
 
 str_signal:
