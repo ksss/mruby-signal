@@ -167,34 +167,6 @@ static const struct signals {
 
 static mrb_state *global_mrb;
 
-static mrb_bool
-reserved_signal_p(int signo)
-{
-#ifdef SIGSEGV
-  if (signo == SIGSEGV)
-    return 1;
-#endif
-#ifdef SIGBUS
-  if (signo == SIGBUS)
-    return 1;
-#endif
-#ifdef SIGILL
-  if (signo == SIGILL)
-    return 1;
-#endif
-#ifdef SIGFPE
-  if (signo == SIGFPE)
-    return 1;
-#endif
-
-#ifdef SIGVTALRM
-  if (signo == SIGVTALRM)
-    return 1;
-#endif
-
-  return 0;
-}
-
 static const char*
 signo2signm(mrb_int no)
 {
@@ -482,14 +454,10 @@ signal_trap(mrb_state *mrb, mrb_value mod)
   struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
 
   mrb_get_args(mrb, "*&", &argv, &argc, &block);
-
   if (argc != 1 && argc != 2)
     mrb_raisef(mrb, E_ARGUMENT_ERROR, "wrong number of arguments (1..2 for %S)", mrb_fixnum_value(argc));
 
   sig = trap_signm(mrb, argv[0]);
-  if (reserved_signal_p(sig)) {
-    mrb_raise(mrb, E_ARGUMENT_ERROR, "can't trap reserved signal");
-  }
 
   if (argc == 1) {
     if (mrb_type(block) != MRB_TT_PROC) {
