@@ -9,6 +9,7 @@
 #include <mruby/array.h>
 #include <mruby/variable.h>
 #include <mruby/class.h>
+#include <mruby/error.h>
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
@@ -394,9 +395,16 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
   mrb_value trap_list;
   mrb_sym id_trap_list;
 
+  if (sig == 0) { /* EXIT */
+    oldfunc = SIG_ERR;
+  }
+  else {
+    oldfunc = mrb_signal(mrb, sig, func);
+    if (oldfunc == SIG_ERR)
+      mrb_sys_fail(mrb, signo2signm(sig));
+  }
   id_trap_list = mrb_intern_lit(mrb, "trap_list");
   trap_list = mrb_iv_get(mrb, mod, id_trap_list);
-  oldfunc = mrb_signal(mrb, sig, func);
   oldcmd = mrb_ary_ref(mrb, trap_list, (mrb_int)sig);
 
   if (mrb_nil_p(oldcmd)) {
