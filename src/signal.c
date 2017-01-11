@@ -309,6 +309,40 @@ sighandler(int sig)
   }
 }
 
+/* TODO: It should register func by sig */
+static sighandler_t
+default_handler(int sig)
+{
+  sighandler_t func;
+  switch (sig) {
+  case SIGINT:
+#ifdef SIGHUP
+  case SIGHUP:
+#endif
+#ifdef SIGQUIT
+  case SIGQUIT:
+#endif
+#ifdef SIGTERM
+  case SIGTERM:
+#endif
+#ifdef SIGALRM
+  case SIGALRM:
+#endif
+#ifdef SIGUSR1
+  case SIGUSR1:
+#endif
+#ifdef SIGUSR2
+  case SIGUSR2:
+#endif
+    func = sighandler;
+    break;
+  default:
+    func = SIG_DFL;
+    break;
+  }
+  return func;
+}
+
 static sighandler_t
 trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
 {
@@ -343,7 +377,7 @@ sig_ign:
             *cmd = mrb_true_value();
           }
           else if (memcmp(RSTRING_PTR(command), "SIG_DFL", 7) == 0) {
-            func = sighandler;
+            func = default_handler(sig);
             *cmd = mrb_true_value();
           }
           break;
