@@ -507,7 +507,7 @@ mrb_trap_exit(mrb_state *mrb)
   mrb_value trap_list = mrb_iv_get(mrb, mrb_obj_value(mrb_mSignal), mrb_intern_lit(mrb, "trap_list"));
   mrb_value command = mrb_ary_ref(mrb, trap_list, 0);
 
-  if (!mrb_nil_p(command)) {
+  if (mrb_type(command) == MRB_TT_PROC) {
     mrb_ary_set(mrb, trap_list, 0, mrb_nil_value());
     mrb_funcall(mrb, command, "call", 1, mrb_fixnum_value(0));
   }
