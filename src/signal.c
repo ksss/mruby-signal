@@ -324,7 +324,7 @@ trap_handler(mrb_state *mrb, mrb_value *cmd, int sig)
       if (mrb_undef_p(command))
         mrb_raise(mrb, E_ARGUMENT_ERROR, "bad handler");
     }
-    if (!mrb_nil_p(command)) {
+    if (mrb_string_p(command)) {
       *cmd = command;
       switch (RSTRING_LEN(command)) {
         case 0:
