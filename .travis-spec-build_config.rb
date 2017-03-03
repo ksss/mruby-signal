@@ -16,6 +16,7 @@ MRuby::Build.new do |conf|
   conf.gem :mgem => "mruby-io"
   conf.gem "../mruby-signal"
   conf.gem :mgem => "mruby-thread"
+  conf.gem :mgem => "mruby-mutex"
   conf.gem :mgem => "mruby-file-stat"
   conf.gem :mgem => "mruby-process"
   conf.gem :mgem => "mruby-at_exit"
