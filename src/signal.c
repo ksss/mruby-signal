@@ -166,6 +166,7 @@ static const struct signals {
 };
 
 static mrb_state *global_mrb;
+static int global_mrb_lock = 0;
 
 static const char*
 signo2signm(mrb_int no)
@@ -373,7 +374,10 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
 {
   struct sigaction sigact, old;
 
-  global_mrb = mrb;
+  if(global_mrb == NULL || global_mrb_lock == 0) {
+    global_mrb = mrb;
+  }
+
   sigemptyset(&sigact.sa_mask);
   sigact.sa_handler = handler;
   sigact.sa_flags = 0;
@@ -544,6 +548,20 @@ install_sighandler(mrb_state *mrb, int signum, sighandler_t handler)
 #  define install_sighandler(mrb, signum, handler) (install_sighandler(mrb, signum, handler) ? mrb_bug(mrb, #signum) : (void)0)
 #endif
 
+static mrb_value
+mrb_lock(mrb_state *mrb, mrb_value mod)
+{
+    global_mrb_lock = 1;
+    return mrb_nil_value();
+}
+
+static mrb_value
+mrb_unlock(mrb_state *mrb, mrb_value mod)
+{
+    global_mrb_lock = 0;
+    return mrb_nil_value();
+}
+
 void
 mrb_mruby_signal_gem_init(mrb_state* mrb) {
   struct RClass *signal = mrb_define_module(mrb, "Signal");
@@ -552,6 +570,8 @@ mrb_mruby_signal_gem_init(mrb_state* mrb) {
   mrb_define_class_method(mrb, signal, "trap", signal_trap, MRB_ARGS_ANY());
   mrb_define_class_method(mrb, signal, "list", signal_list, MRB_ARGS_NONE());
   mrb_define_class_method(mrb, signal, "signame", signal_signame, MRB_ARGS_REQ(1));
+  mrb_define_class_method(mrb, signal, "lock", mrb_lock, MRB_ARGS_NONE());
+  mrb_define_class_method(mrb, signal, "unlock", mrb_unlock, MRB_ARGS_NONE());
 
   mrb_define_method(mrb, mrb->kernel_module, "trap", signal_trap, MRB_ARGS_ANY());
 
