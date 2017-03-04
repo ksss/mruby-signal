@@ -165,7 +165,7 @@ static const struct signals {
   {NULL, 0}
 };
 
-static mrb_state *global_mrb;
+static mrb_state *initial_mrb = NULL;
 
 static const char*
 signo2signm(mrb_int no)
@@ -228,7 +228,7 @@ static sighandler_t mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
 static RETSIGTYPE
 sighandler(int sig)
 {
-  mrb_state *mrb = global_mrb;
+  mrb_state *mrb = initial_mrb;
   struct RClass *mrb_mSignal = mrb_module_get(mrb, "Signal");
   mrb_value trap_list = mrb_iv_get(mrb, mrb_obj_value(mrb_mSignal), mrb_intern_lit(mrb, "trap_list"));
   mrb_value command = mrb_ary_ref(mrb, trap_list, sig);
@@ -373,7 +373,6 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
 {
   struct sigaction sigact, old;
 
-  global_mrb = mrb;
   sigemptyset(&sigact.sa_mask);
   sigact.sa_handler = handler;
   sigact.sa_flags = 0;
@@ -451,6 +450,12 @@ signal_trap(mrb_state *mrb, mrb_value mod)
   mrb_value *argv;
   mrb_int argc;
   sighandler_t func;
+  struct RClass *mrb_mSignal;
+
+  if (initial_mrb != mrb) {
+    /* multi mrb_state doesn't supported yet */
+    return mrb_nil_value();
+  }
 
   mrb_get_args(mrb, "*&", &argv, &argc, &block);
   if (argc != 1 && argc != 2)
@@ -555,6 +560,10 @@ mrb_mruby_signal_gem_init(mrb_state* mrb) {
 
   mrb_define_method(mrb, mrb->kernel_module, "trap", signal_trap, MRB_ARGS_ANY());
 
+  if (initial_mrb) return;
+
+  /* handle only main mrb_state */
+  initial_mrb = mrb;
   install_sighandler(mrb, SIGINT, sighandler);
 #ifdef SIGHUP
   install_sighandler(mrb, SIGHUP, sighandler);
