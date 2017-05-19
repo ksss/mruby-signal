@@ -452,10 +452,9 @@ signal_trap(mrb_state *mrb, mrb_value mod)
   sighandler_t func;
   struct RClass *mrb_mSignal;
 
-  if (mruby_signal_mrb != mrb) 
-    mrb_raisef(mrb, E_ARGUMENT_ERROR, "NOOOOO NOOO NOOO i mrb son diversi!!!!!!!!!!!!!!!!!!!!");
+  if (mruby_signal_mrb!=mrb) 
+    mrb_raise(mrb,E_TYPE_ERROR,"A different MRB has been passed.");
     /* multi mrb_state doesn't supported yet */
-  
 
   mrb_get_args(mrb, "*&", &argv, &argc, &block);
   if (argc != 1 && argc != 2)
