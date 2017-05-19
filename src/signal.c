@@ -442,7 +442,6 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
   return oldcmd;
 }
 
-
 static mrb_value
 signal_trap(mrb_state *mrb, mrb_value mod)
 {
@@ -453,10 +452,10 @@ signal_trap(mrb_state *mrb, mrb_value mod)
   sighandler_t func;
   struct RClass *mrb_mSignal;
 
-  if (mruby_signal_mrb != mrb) {
+  if (mruby_signal_mrb != mrb) 
+    mrb_raisef(mrb, E_ARGUMENT_ERROR, "NOOOOO NOOO NOOO i mrb son diversi!!!!!!!!!!!!!!!!!!!!");
     /* multi mrb_state doesn't supported yet */
-    return mrb_nil_value();
-  }
+  
 
   mrb_get_args(mrb, "*&", &argv, &argc, &block);
   if (argc != 1 && argc != 2)
@@ -550,6 +549,32 @@ install_sighandler(mrb_state *mrb, int signum, sighandler_t handler)
 #  define install_sighandler(mrb, signum, handler) (install_sighandler(mrb, signum, handler) ? mrb_bug(mrb, #signum) : (void)0)
 #endif
 
+mrb_value mrb_mruby_signal_handler_reset(mrb_state *mrb,mrb_value self)
+{
+  mruby_signal_mrb=mrb;
+  install_sighandler(mrb,SIGINT,sighandler);
+#ifdef SIGHUP
+  install_sighandler(mrb,SIGHUP,sighandler);
+#endif
+#ifdef SIGQUIT
+  install_sighandler(mrb,SIGQUIT,sighandler);
+#endif
+#ifdef SIGTERM
+  install_sighandler(mrb,SIGTERM,sighandler);
+#endif
+#ifdef SIGALRM
+  install_sighandler(mrb,SIGALRM,sighandler);
+#endif
+#ifdef SIGUSR1
+  install_sighandler(mrb,SIGUSR1,sighandler);
+#endif
+#ifdef SIGUSR2
+  install_sighandler(mrb,SIGUSR2,sighandler);
+#endif
+
+  return self;
+}
+
 void
 mrb_mruby_signal_gem_init(mrb_state* mrb) {
   struct RClass *signal = mrb_define_module(mrb, "Signal");
@@ -558,6 +583,7 @@ mrb_mruby_signal_gem_init(mrb_state* mrb) {
   mrb_define_class_method(mrb, signal, "trap", signal_trap, MRB_ARGS_ANY());
   mrb_define_class_method(mrb, signal, "list", signal_list, MRB_ARGS_NONE());
   mrb_define_class_method(mrb, signal, "signame", signal_signame, MRB_ARGS_REQ(1));
+  mrb_define_class_method(mrb,signal,"reset!",mrb_mruby_signal_handler_reset,MRB_ARGS_NONE());
 
   mrb_define_method(mrb, mrb->kernel_module, "trap", signal_trap, MRB_ARGS_ANY());
 
