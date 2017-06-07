@@ -23,6 +23,8 @@ assert 'Signal#trap' do
   Signal.trap(0, "SIG_DFL")
   assert_nil Signal.trap("EXIT"){}
   assert_raise(ArgumentError){ Signal.trap -1 }
+
+  assert_nil Signal.trap(:RT1){}
 end
 
 assert "Signal#list" do
@@ -35,5 +37,8 @@ assert "Signal#signame" do
   assert_equal "HUP", Signal.signame(1)
   assert_equal "INT", Signal.signame(2)
   assert_equal "QUIT", Signal.signame(3)
+  assert_equal "RT0", Signal.signame(34)
+  assert_equal "RT30", Signal.signame(64)
+  assert_equal nil, Signal.signame(65)
   assert_equal nil, Signal.signame(-1)
 end

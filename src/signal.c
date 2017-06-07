@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 
 #if defined(__BEOS__) || defined(__HAIKU__)
 # undef SIGBUS
@@ -167,15 +168,24 @@ static const struct signals {
 
 static mrb_state *mruby_signal_mrb = NULL;
 
-static const char*
-signo2signm(mrb_int no)
+static int
+signo2signm(mrb_int no, char *signm_buf)
 {
   const struct signals *sigs;
 
   for (sigs = siglist; sigs->signm; sigs++) {
-    if (sigs->signo == no)
-      return sigs->signm;
+    if (sigs->signo == no) {
+      strcpy(signm_buf, sigs->signm);
+      return 1;
+    }
   }
+#ifdef SIGRTMIN
+  if (no >= SIGRTMIN && no <= SIGRTMAX) {
+    int rt_no = no - SIGRTMIN;
+    sprintf(signm_buf, "%s%d", "RT", rt_no);
+    return 1;
+  }
+#endif
   return 0;
 }
 
@@ -188,6 +198,20 @@ signm2signo(const char *nm)
     if (strcmp(sigs->signm, nm) == 0)
       return sigs->signo;
   }
+
+#ifdef SIGRTMIN
+  /* Handle RT Signal#0 as special for strtol's err spec */
+  if (strcmp("RT0", nm) == 0)
+    return SIGRTMIN;
+
+  if (strncmp("RT", nm, 2) == 0) {
+    int ret = (int)strtol(nm + 2, NULL, 0);
+    if (!ret || (SIGRTMIN + ret > SIGRTMAX))
+      return 0;
+
+    return SIGRTMIN + ret;
+  }
+#endif
   return 0;
 }
 
@@ -403,14 +427,17 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
   mrb_value oldcmd;
   mrb_value trap_list;
   mrb_sym id_trap_list;
+  char *signm_buf[12];
 
   if (sig == 0) { /* EXIT */
     oldfunc = SIG_ERR;
   }
   else {
     oldfunc = mrb_signal(mrb, sig, func);
-    if (oldfunc == SIG_ERR)
-      mrb_sys_fail(mrb, signo2signm(sig));
+    if (oldfunc == SIG_ERR) {
+      signo2signm(sig, signm_buf);
+      mrb_sys_fail(mrb, signm_buf);
+    }
   }
   id_trap_list = mrb_intern_lit(mrb, "trap_list");
   trap_list = mrb_iv_get(mrb, mod, id_trap_list);
@@ -505,11 +532,14 @@ signal_signame(mrb_state *mrb, mrb_value mod)
 {
   mrb_int signo;
   const char *signame;
+  char *signm_buf[12];
+  int ret;
 
   mrb_get_args(mrb, "i", &signo);
-  signame = signo2signm(signo);
-  if (signame)
-    return mrb_str_new_cstr(mrb, signame);
+  ret = signo2signm(signo, signm_buf);
+
+  if (ret)
+    return mrb_str_new_cstr(mrb, signm_buf);
   else
     return mrb_nil_value();
 }
