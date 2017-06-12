@@ -483,6 +483,12 @@ signal_list(mrb_state *mrb, mrb_value mod)
   for (sigs = siglist; sigs->signm; sigs++) {
     mrb_hash_set(mrb, h, mrb_str_new_cstr(mrb, sigs->signm), mrb_fixnum_value(sigs->signo));
   }
+#ifdef SIGRTMIN
+  mrb_hash_set(mrb, h, mrb_str_new_lit(mrb, "RTMIN"), mrb_fixnum_value(SIGRTMIN));
+#endif
+#ifdef SIGRTMAX
+  mrb_hash_set(mrb, h, mrb_str_new_lit(mrb, "RTMAX"), mrb_fixnum_value(SIGRTMAX));
+#endif
   return h;
 }
 
