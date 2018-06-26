@@ -1,0 +1,11 @@
+version: "2"
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/mruby-signal
+    working_dir: /mruby
+    environment:
+      MRUBY_CONFIG: /mruby-signal/docker/build_config.rb
