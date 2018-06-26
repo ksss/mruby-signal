@@ -417,7 +417,9 @@ trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value comman
   oldcmd = mrb_ary_ref(mrb, trap_list, (mrb_int)sig);
 
   if (mrb_nil_p(oldcmd)) {
-    if (oldfunc == sighandler)
+    if (oldfunc == SIG_DFL)
+      oldcmd = mrb_str_new_cstr(mrb, "SYSTEM_DEFAULT");
+    else if (oldfunc == sighandler)
       oldcmd = mrb_str_new_cstr(mrb, "DEFAULT");
     else
       oldcmd = mrb_nil_value();
