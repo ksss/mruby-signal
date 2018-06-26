@@ -22,6 +22,10 @@
 # define NSIG (_SIGMAX + 1)      /* For QNX */
 #endif
 
+#ifndef SIGKILL
+# define SIGKILL 9
+#endif
+
 #define sighandler_t void*
 
 #define RETSIGTYPE void
@@ -368,6 +372,17 @@ sig_dfl:
   return func;
 }
 
+#if defined _WIN32
+static inline sighandler_t
+mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
+{
+  if (signum == SIGKILL) {
+    errno = EINVAL;
+    return SIG_ERR;
+  }
+  return signal(signum, handler);
+}
+#else
 static sighandler_t
 mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
 {
@@ -395,6 +410,7 @@ mrb_signal(mrb_state *mrb, int signum, sighandler_t handler)
   }
   return old.sa_handler;
 }
+#endif
 
 static mrb_value
 trap(mrb_state *mrb, mrb_value mod, int sig, sighandler_t func, mrb_value command)
