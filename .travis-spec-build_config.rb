@@ -13,7 +13,6 @@ MRuby::Build.new do |conf|
   conf.gembox 'full-core'
   conf.gem :mgem => "mruby-env"
   conf.gem :mgem => "mruby-dir-glob"
-  conf.gem :mgem => "mruby-io"
   conf.gem "../mruby-signal"
   conf.gem :mgem => "mruby-thread"
   conf.gem :mgem => "mruby-file-stat"
