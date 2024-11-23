@@ -169,7 +169,19 @@ static const struct signals {
   {NULL, 0}
 };
 
-static mrb_state *mruby_signal_mrb = NULL;
+#ifdef __cplusplus
+#define THREAD_LOCAL thread_local
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define THREAD_LOCAL _Thread_local
+#elif defined(__GNUC__)
+#define THREAD_LOCAL __thread
+#elif defined(_MSC_VER)
+#define THREAD_LOCAL __declspec(thread)
+#else
+#error "Cannot define THREAD_LOCAL"
+#endif
+
+THREAD_LOCAL mrb_state *mruby_signal_mrb = NULL;
 
 static const char*
 signo2signm(mrb_int no)
@@ -202,8 +214,8 @@ trap_signm(mrb_state *mrb, mrb_value vsig)
   const char *s;
 
   switch (mrb_type(vsig)) {
-    case MRB_TT_FIXNUM:
-      sig = mrb_fixnum(vsig);
+    case MRB_TT_INTEGER:
+      sig = mrb_integer(vsig);
       if (sig < 0 || sig >= NSIG) {
         mrb_raisef(mrb, E_ARGUMENT_ERROR, "invalid signal number (%S)", vsig);
       }
