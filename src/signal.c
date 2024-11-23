@@ -214,7 +214,6 @@ trap_signm(mrb_state *mrb, mrb_value vsig)
   const char *s;
 
   switch (mrb_type(vsig)) {
-    case MRB_TT_FIXNUM:
     case MRB_TT_INTEGER:
       sig = mrb_integer(vsig);
       if (sig < 0 || sig >= NSIG) {
